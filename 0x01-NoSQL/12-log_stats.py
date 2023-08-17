@@ -1,24 +1,19 @@
 #!/usr/bin/env python3
-""" 12. Log stats
-"""
-
-
+"""Print nginx logs """
 from pymongo import MongoClient
 
-
 if __name__ == "__main__":
+    """ checking for all elements in collection """
     client = MongoClient('mongodb://127.0.0.1:27017')
+    collection = client.logs.nginx
 
-    nginx_collection = client.logs.nginx
+    print(f"{collection.estimated_document_count()} logs")
 
-    print("{} logs".format(nginx_collection.count_documents({})))
-
-    methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
     print("Methods:")
-    for method in methods:
-        print("\tmethod {}: {}".format(method,
-                                       nginx_collection.count_documents
-                                       ({"method": method})))
+    for method in ["GET", "POST", "PUT", "PATCH", "DELETE"]:
+        method_count = collection.count_documents({'method': method})
+        print(f"\tmethod {method}: {method_count}")
 
-    print("{} status check".format(nginx_collection.count_documents({
-                                   "method": "GET", "path": "/status"})))
+    check_get = collection.count_documents(
+        {'method': 'GET', 'path': "/status"})
+    print(f"{check_get} status check")
